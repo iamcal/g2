@@ -1,0 +1,116 @@
+There are 4 queries that the current web frontend makes to gmetad:
+
+	/?filter=summary		overall summary
+	/$cluster			cluster detail
+	/$cluster?filter=summary	cluster summary
+	/$cluster/$host			host detail
+
+All of the information returned by the cluster summary is also returned by the overall summary.
+All of the information returned by the host detail is also returned by the cluster detail.
+You can get all the possible data using only the first two calls.
+
+In theory there are also the following calls:
+
+	/$cluster/$host?filter=summary
+	/$cluster/$host/$metric
+	/$cluster/$host/$metric?filter=summary
+
+They are similarly pretty useless to us.
+From: http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg03642.html
+
+The only reason to avoid using the first calls is speed (caused by amount of data sent over the
+wire I assume, not getting the data out of gmetad since it's all in memory), but i'd like to see
+some numbers on huge clusters before I believe that.
+
+
+========================================================================================================================================
+/?filter=summary
+
+<GANGLIA_XML VERSION="3.1.2" SOURCE="gmetad">
+	<GRID NAME="us-east.ec2.tinyspeck.com" AUTHORITY="http://domU-12-31-39-01-5C-87/ganglia/" LOCALTIME="1287109607">
+		<HOSTS UP="25" DOWN="0" SOURCE="gmetad"/>
+		<METRICS NAME="disk_free" SUM="6408.996" NUM="25" TYPE="double" UNITS="GB" SLOPE="both" SOURCE="gmond">
+			<EXTRA_DATA>
+				<EXTRA_ELEMENT NAME="GROUP" VAL="disk"/>
+				<EXTRA_ELEMENT NAME="DESC" VAL="Total free disk space"/>
+				<EXTRA_ELEMENT NAME="TITLE" VAL="Disk Space Available"/>
+			</EXTRA_DATA>
+		</METRICS>
+		...
+		<CLUSTER NAME="www" LOCALTIME="1287109589" OWNER="unspecified" LATLONG="unspecified" URL="unspecified">
+			<HOSTS UP="2" DOWN="0" SOURCE="gmetad"/>
+			<METRICS NAME="disk_free" SUM="315.944" NUM="2" TYPE="double" UNITS="GB" SLOPE="both" SOURCE="gmond">
+				<EXTRA_DATA>
+					<EXTRA_ELEMENT NAME="GROUP" VAL="disk"/>
+					<EXTRA_ELEMENT NAME="DESC" VAL="Total free disk space"/>
+					<EXTRA_ELEMENT NAME="TITLE" VAL="Disk Space Available"/>
+				</EXTRA_DATA>
+			</METRICS>
+			...
+		</CLUSTER>
+		...
+	</GRID>
+	...? (i only have one grid to test)
+</GANGLIA_XML>
+
+========================================================================================================================================
+/$cluster
+
+<GANGLIA_XML VERSION="3.1.2" SOURCE="gmetad">
+	<GRID NAME="us-east.ec2.tinyspeck.com" AUTHORITY="http://domU-12-31-39-01-5C-87/ganglia/" LOCALTIME="1287110153">
+		<CLUSTER NAME="www" LOCALTIME="1287110144" OWNER="unspecified" LATLONG="unspecified" URL="unspecified">
+			<HOST NAME="www1" IP="10.254.175.178" REPORTED="1287110140" TN="12" TMAX="20" DMAX="0" LOCATION="unspecified" GMOND_STARTED="1285891905">
+				<METRIC NAME="machine_type" VAL="x86" TYPE="string" UNITS="" TN="243" TMAX="1200" DMAX="0" SLOPE="zero" SOURCE="gmond">
+					<EXTRA_DATA>
+						<EXTRA_ELEMENT NAME="GROUP" VAL="system"/>
+						<EXTRA_ELEMENT NAME="DESC" VAL="System architecture"/>
+						<EXTRA_ELEMENT NAME="TITLE" VAL="Machine Type"/>
+					</EXTRA_DATA>
+				</METRIC>
+				...
+			</HOST>
+			...
+		</CLUSTER>
+	</GRID>
+</GANGLIA_XML>
+
+========================================================================================================================================
+/$cluster?filter=summary
+
+<GANGLIA_XML VERSION="3.1.2" SOURCE="gmetad">
+	<GRID NAME="us-east.ec2.tinyspeck.com" AUTHORITY="http://domU-12-31-39-01-5C-87/ganglia/" LOCALTIME="1287110278">
+		<CLUSTER NAME="www" LOCALTIME="1287110275" OWNER="unspecified" LATLONG="unspecified" URL="unspecified">
+			<HOSTS UP="2" DOWN="0" SOURCE="gmetad"/>
+			<METRICS NAME="disk_free" SUM="315.944" NUM="2" TYPE="double" UNITS="GB" SLOPE="both" SOURCE="gmond">
+				<EXTRA_DATA>
+					<EXTRA_ELEMENT NAME="GROUP" VAL="disk"/>
+					<EXTRA_ELEMENT NAME="DESC" VAL="Total free disk space"/>
+					<EXTRA_ELEMENT NAME="TITLE" VAL="Disk Space Available"/>
+				</EXTRA_DATA>
+			</METRICS>
+			...
+		</CLUSTER>
+	</GRID>
+</GANGLIA_XML>
+
+
+========================================================================================================================================
+/$cluster/$host
+
+<GANGLIA_XML VERSION="3.1.2" SOURCE="gmetad">
+	<GRID NAME="us-east.ec2.tinyspeck.com" AUTHORITY="http://domU-12-31-39-01-5C-87/ganglia/" LOCALTIME="1287110364">
+		<CLUSTER NAME="www" LOCALTIME="1287110357" OWNER="unspecified" LATLONG="unspecified" URL="unspecified">
+			<HOST NAME="www1" IP="10.254.175.178" REPORTED="1287110350" TN="13" TMAX="20" DMAX="0" LOCATION="unspecified" GMOND_STARTED="1285891905">
+				<METRIC NAME="machine_type" VAL="x86" TYPE="string" UNITS="" TN="450" TMAX="1200" DMAX="0" SLOPE="zero" SOURCE="gmond">
+					<EXTRA_DATA>
+						<EXTRA_ELEMENT NAME="GROUP" VAL="system"/>
+						<EXTRA_ELEMENT NAME="DESC" VAL="System architecture"/>
+						<EXTRA_ELEMENT NAME="TITLE" VAL="Machine Type"/>
+					</EXTRA_DATA>
+				</METRIC>
+				...
+			</HOST>
+		</CLUSTER>
+	</GRID>
+</GANGLIA_XML>
+
